@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  username    String    @unique
+  password    String
+  servers     Server[]  @relation("OwnedServers")
+  memberships Server[]  @relation("ServerMembers")
+  messages    Message[]
+}
+
+model Server {
+  id       String    @id @default(cuid())
+  name     String
+  ownerId  String
+  owner    User      @relation("OwnedServers", fields: [ownerId], references: [id])
+  channels Channel[]
+  members  User[]    @relation("ServerMembers")
+}
+
+model Channel {
+  id       String    @id @default(cuid())
+  name     String
+  serverId String
+  server   Server    @relation(fields: [serverId], references: [id])
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+  channelId String
+  user      User     @relation(fields: [userId], references: [id])
+  channel   Channel  @relation(fields: [channelId], references: [id])
+}
