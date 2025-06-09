@@ -1,7 +1,43 @@
 import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3808"); // Adjust the URL as needed
+
+interface Message { // move this to a separate file if needed
+    id: string;
+    content: string;
+    userId: string;
+    channelId: string;
+    createdAt: Date;
+}
 
 export default function Server() {
-    const { id, channelId } = useParams();
+    const { channelId } = useParams();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const messageInput = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (channelId) {
+            socket.emit('join', channelId);
+            socket.on('message', (msg) => {
+                setMessages((prevMessages) => [...prevMessages, msg]);
+            });
+
+            return () => {
+                socket.off('message'); // Clean up the event listener
+            };
+        }
+    }, [channelId]);
+
+    const sendMessage = () => {
+        const content = messageInput.current?.value.trim();
+        const userId = localStorage.getItem('userId'); // could also be from auth store
+        if (channelId && content && userId) {
+            socket.emit('message', { channelId, content, userId });
+            messageInput.current!.value = ''; // Clear the input after sending
+        }
+    };
 
     return (
         <div className="flex h-screen">
@@ -18,17 +54,18 @@ export default function Server() {
             <main className="flex-1 p-4 bg-gray-100">
                 <h2 className="text-xl font-bold mb-2">Channel: {channelId}</h2>
                 <div className="h-[70vh] bg-white shadow-inner p-2 overflow-y-auto">
-                    {/* Chat messages will go here */}
-                    <div className="mb-2">
-                        <strong>User1:</strong> Hello, world!
-                    </div>
+                    {messages.map((msg, i) => (
+                        <div className="mb-2" key={i}>
+                            <strong>{msg.userId}:</strong> {msg.content}
+                        </div>
+                    ))}
                     <div className="mb-2">
                         <strong>User2:</strong> This is a test message.
                     </div>
                 </div>
                 <form className="mt-4 flex gap-2">
-                    <input type="text" placeholder="Type a message..." className="flex-1 border p-2 rounded" />
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+                    <input ref={messageInput} type="text" placeholder="Type a message..." className="flex-1 border p-2 rounded" />
+                    <button type="submit" onClick={sendMessage} className="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
                 </form>
             </main>
         </div>
