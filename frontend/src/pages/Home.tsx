@@ -1,10 +1,20 @@
+import { useEffect } from "react";
 import { useAuthStore } from "../stores/useAuthStore";
+import { useSocketStore } from "../stores/socketStore";
 import { Link } from "react-router-dom";
 
 export default function Home() {
     const user = useAuthStore((state) => state.user);
 
-    if (!user) return <p>Please log in</p>;
+    const connect = useSocketStore((state) => state.connect);
+
+    useEffect(() => {
+        connect();
+    }, [connect]);
+
+    if (!user) {
+        return <div>Please log in.</div>;
+    }
 
 
     return (

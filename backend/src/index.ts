@@ -87,21 +87,27 @@ app.get('/api/me', authMiddleware, async (req, res) => {
     }
 });
 
-app.get('/api/channels/:id/messages', authMiddleware, async (req, res) => {
-    const { id } = req.params;
-    const messages = await prisma.message.findMany({
-        where: { channelId: id },
-        include: {
-            user: {
-                select: { id: true, username: true }, // Include user info but not password
+app.get('/api/channels/:channelId/messages', authMiddleware, async (req, res) => {
+    const { channelId } = req.params;
+    try {
+        const messages = await prisma.message.findMany({
+            where: { channelId },
+            include: {
+                user: {
+                    select: { id: true, username: true }, // Include user info but not password
+                },
             },
-        },
-        orderBy: { createdAt: 'asc' }, // Order messages by creation time
-    })
-    res.json(messages);
+            orderBy: { createdAt: 'asc' }, // Order messages by creation time
+        });
+
+        res.json(messages);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Could not fetch messages' });
+    }
 });
 
-app.post('/api/channels/:id/messages', authMiddleware, async (req, res) => {
+app.post('/api/channels/:channelId/messages', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const { content } = req.body;
     const { userId } = req as AuthRequest;
@@ -136,23 +142,25 @@ app.post('/api/channels/:id/messages', authMiddleware, async (req, res) => {
 
 io.on('connection', (socket) => {
     console.log('User connected: ', socket.id);
+    
     socket.on('join', (channelId) => {
         socket.join(channelId);
         console.log(`User ${socket.id} joined channel ${channelId}`);
     });
+
     socket.on('message', async ({ channelId, content, userId }) => {
         const message = await prisma.message.create({
             data: { channelId, content, userId },
-            include: { user: true } // Include user info in the message
+            include: { user: true } // Include username via relation
         });
+
         io.to(channelId).emit('message', {
             id: message.id,
             content: message.content,
+            userId: message.userId,
+            username: message.user.username,
             createdAt: message.createdAt,
-            user: {
-                id: message.user.id,
-                username: message.user.username,
-            },
+            channelId: message.channelId
         });
     });
 });
