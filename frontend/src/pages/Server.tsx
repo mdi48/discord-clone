@@ -1,16 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { Message } from "../types/message";
 
 const socket = io("http://localhost:3808"); // Adjust the URL as needed
 
-interface Message { // move this to a separate file if needed
-    id: string;
-    content: string;
-    userId: string;
-    channelId: string;
-    createdAt: Date;
-}
 
 export default function Server() {
     const { channelId } = useParams();
