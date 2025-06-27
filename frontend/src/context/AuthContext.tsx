@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useState, useEffect } from 'react';
-import { User } from '../types/user' // Adjust the import path as needed
+import  User  from '../types/user' // Adjust the import path as needed
 
 type AuthProviderProps = {
     children: ReactNode;
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');

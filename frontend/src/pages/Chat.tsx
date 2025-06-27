@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
-import { Message } from '../types/message';
+import Message from '../types/message';
+import ChatProps from '../types/chatprops';
+
 
 
 const socket = io('http://localhost:3808'); // Adjust the URL as needed
 
-export default function Chat() {
+export default function Chat({ channelId }: ChatProps) {
     const { user, token } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [content, setContent] = useState('');
-    const channelId = '1'; // Replace with dynamic channel ID as needed
-
 
 
     useEffect(() => {

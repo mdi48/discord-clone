@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { Message } from "../types/message";
+import Message  from "../types/message";
 
 const socket = io("http://localhost:3808"); // Adjust the URL as needed
 
@@ -50,7 +50,7 @@ export default function Server() {
                 <div className="h-[70vh] bg-white shadow-inner p-2 overflow-y-auto">
                     {messages.map((msg, i) => (
                         <div className="mb-2" key={i}>
-                            <strong>{msg.userId}:</strong> {msg.content}
+                            <strong>{msg.user.id}:</strong> {msg.content}
                         </div>
                     ))}
                     <div className="mb-2">

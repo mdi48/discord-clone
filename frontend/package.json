@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
+    "context": "^3.0.33",
     "frontend": "file:",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

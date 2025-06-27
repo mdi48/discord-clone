@@ -23,7 +23,7 @@ export default function Login() {
         const data = await res.json();
         if (res.ok) {
             login(data.token, data.user); // Assuming the backend returns a token and user object
-            navigate('/'); // Redirect to home after successful login
+            navigate('/chat'); // Use /chat as the home page
         } else {
             alert(data.error); // Show error message from backend
         }
